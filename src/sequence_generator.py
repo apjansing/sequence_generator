@@ -1,3 +1,6 @@
+from sympy import isprime
+
+
 class SequenceGenerator:
     """
     This class generates a fibonacci-like sequence
@@ -5,7 +8,7 @@ class SequenceGenerator:
     :param num2: The second number in the sequence
     """
 
-    def __init__(self, num1, num2):
+    def __init__(self, num1: int, num2: int):
         self.num1 = num1
         self.num2 = num2
 
@@ -20,29 +23,21 @@ class SequenceGenerator:
             sequence.append(sequence[i - 1] + sequence[i - 2])
         return sequence
 
-    def is_prime(self, num):
-        """
-        Checks if a number is prime
-        :param num: The number to check
-        """
-        if num < 2:
-            return False
-        for i in range(2, int(num**0.5) + 1):
-            if num % i == 0:
-                return False
-        return True
-
-    def generate_prime_sequence(self, n):
+    def generate_prime_sequence(self, n: int, include_indices: bool = False):
         """
         Generates a fibonacci-like sequence of numbers
         :param n: The number of numbers to generate
+        :param include_indices: Whether to include indices in the sequence
         :return: A list of numbers where the indices are prime numbers
         """
         sequence = self.generate_sequence(n)
         prime_sequence = []
         for i, num in enumerate(sequence):
-            if self.is_prime(i + 1):
-                prime_sequence.append((i + 1, num))
+            if isprime(i + 1):
+                if include_indices:
+                    prime_sequence.append((i + 1, num))
+                else:
+                    prime_sequence.append(num)
             if len(prime_sequence) == n:
                 break
         return prime_sequence

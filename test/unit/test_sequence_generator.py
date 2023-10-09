@@ -10,35 +10,20 @@ def test_generate_sequence():
     assert SequenceGenerator(0, 0).generate_sequence(5) == [0, 0, 0, 0, 0]
 
 
-def test_is_prime():
-    """
-    This test checks if a number is prime
-    """
-    assert SequenceGenerator(1, 1).is_prime(2) is True
-    assert SequenceGenerator(1, 1).is_prime(3) is True
-    assert SequenceGenerator(1, 1).is_prime(4) is False
-    assert SequenceGenerator(1, 1).is_prime(11) is True
-    assert SequenceGenerator(1, 1).is_prime(15) is False
-
-
 def test_generate_prime_sequence():
     """
     This test generates the first n numbers in a sequence and returns a list of tuples
     where the first element is the index of the number in the sequence and the second
     element is the number itself. The index is a prime number.
     """
-    assert SequenceGenerator(2, 3).generate_prime_sequence(5) == [
-        (2, 3),
-        (3, 5),
-        (5, 13),
-    ]
-    assert SequenceGenerator(3, 5).generate_prime_sequence(10) == [
+    assert SequenceGenerator(2, 3).generate_prime_sequence(5) == [3, 5, 13]
+    assert SequenceGenerator(3, 5).generate_prime_sequence(10, True) == [
         (2, 5),
         (3, 8),
         (5, 21),
         (7, 55),
     ]
-    assert SequenceGenerator(2, 11).generate_prime_sequence(101) == [
+    assert SequenceGenerator(2, 11).generate_prime_sequence(101, True) == [
         (2, 11),
         (3, 13),
         (5, 37),

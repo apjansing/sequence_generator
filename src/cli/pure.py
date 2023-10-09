@@ -29,7 +29,7 @@ from src.sequence_generator import SequenceGenerator
     default=False,
     help="Include indices in sequence.",
 )
-def generate_sequence(nums: Tuple[int, int], length: int, indices: bool):
+def pure(nums: Tuple[int, int], length: int, indices: bool):
     """
     This function generates a fibonacci-like sequence of numbers
     """
