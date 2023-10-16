@@ -6,6 +6,9 @@ authors = ["Alex Jansing"]
 readme = "README.md"
 packages = [{include = "src"}]
 
+[tool.pylint]
+disable = "C0114,E0611,W0621"
+
 [tool.poetry.scripts]
 generate_sequence = "src.cli.cli:generate_sequence"
 
