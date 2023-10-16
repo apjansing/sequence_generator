@@ -1,7 +1,7 @@
-from typing import List
+from typing import List, Optional
 import click
-from src.cli.utils import safe_eval
 from src.sequence_generator import SequenceGenerator
+from src.cli.utils import safe_eval
 
 
 @click.command(context_settings={"show_default": True})
@@ -34,9 +34,11 @@ from src.sequence_generator import SequenceGenerator
     type=int,
     help="Sequence initiators",
 )
-def pure(nums: List[int], lambda_str: str, length: int, indices: bool):
+def prime_indices(
+    nums: List[int], length: int, indices: bool, lambda_str: Optional[str] = None
+):
     """
-    Generates a sequence of numbers
+    Return only the prime indices from a generated sequence
     """
     generator = None
     if lambda_str:
@@ -44,8 +46,5 @@ def pure(nums: List[int], lambda_str: str, length: int, indices: bool):
         generator = SequenceGenerator(list(nums), lambda_eval)
     else:
         generator = SequenceGenerator(list(nums))
-    sequence = generator.generate_sequence(length)
-    if indices:
-        print([(i + 1, num) for i, num in enumerate(sequence)])
-    else:
-        print(sequence)
+    sequence = generator.generate_prime_index_sequence(length, indices)
+    print(sequence)

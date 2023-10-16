@@ -1,19 +1,11 @@
-from typing import Tuple
+from typing import List, Optional
 import click
 from src.sequence_generator import SequenceGenerator
+from src.cli.utils import safe_eval
 
 
-@click.command()
+@click.command(context_settings={"show_default": True})
 @click.help_option("-h", "--help")
-@click.option(
-    "-n",
-    "--nums",
-    default=[1, 1],
-    nargs=2,
-    type=int,
-    show_default=True,
-    help="Sequence initiators (2 numbers)",
-)
 @click.option(
     "-l",
     "--length",
@@ -22,18 +14,37 @@ from src.sequence_generator import SequenceGenerator
     help="Length of sequence",
 )
 @click.option(
+    "-L",
+    "--lambda_str",
+    type=str,
+    help="String representation of a lambda function",
+)
+@click.option(
     "-i",
     "--indices",
     is_flag=True,
-    show_default=True,
     default=False,
     help="Include indices in sequence.",
 )
-def primes(nums: Tuple[int, int], length: int, indices: bool):
+@click.option(
+    "-n",
+    "--nums",
+    default=[1, 1],
+    multiple=True,
+    type=int,
+    help="Sequence initiators",
+)
+def primes(
+    nums: List[int], length: int, indices: bool, lambda_str: Optional[str] = None
+):
     """
-    This function generates a fibonacci-like sequence of numbers
+    Return prime numbers from a generated sequence
     """
-    sequence = SequenceGenerator(nums[0], nums[1]).generate_prime_sequence(
-        length, indices
-    )
+    generator = None
+    if lambda_str:
+        lambda_eval = safe_eval(lambda_str)
+        generator = SequenceGenerator(list(nums), lambda_eval)
+    else:
+        generator = SequenceGenerator(list(nums))
+    sequence = generator.generate_prime_sequence(length, include_indices=indices)
     print(sequence)
