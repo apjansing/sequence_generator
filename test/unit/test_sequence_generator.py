@@ -1,4 +1,4 @@
-from src.sequence_generator import SequenceGenerator
+from sequence_generator import SequenceGenerator
 
 
 def test_generate_sequence():
