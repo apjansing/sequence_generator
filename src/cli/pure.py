@@ -1,13 +1,9 @@
-from typing import List
+from typing import List, Optional
 import click
 from src.cli.utils import safe_eval
 from src.sequence_generator import SequenceGenerator
-from .options import (
-    length,
-    lambda_str,
-    indices,
-    nums,
-)
+from .options import length, lambda_str, indices, nums, filename, continue_sequence
+from loguru import logger
 
 
 @click.command(context_settings={"show_default": True})
@@ -16,18 +12,34 @@ from .options import (
 @lambda_str
 @indices
 @nums
-def pure(nums: List[int], lambda_str: str, length: int, indices: bool):
+@filename
+@continue_sequence
+def pure(
+    nums: List[int],
+    length: int,
+    indices: bool,
+    filename: str,
+    lambda_str: Optional[str] = None,
+    continue_sequence: bool = False,
+):
     """
     Generates a sequence of numbers
     """
     generator = None
     if lambda_str:
         lambda_eval = safe_eval(lambda_str)
-        generator = SequenceGenerator(list(nums), lambda_eval)
+        generator = SequenceGenerator(
+            list(nums),
+            lambda_eval,
+            filename=filename,
+            continue_sequence=continue_sequence,
+        )
     else:
-        generator = SequenceGenerator(list(nums))
-    sequence = generator.generate_sequence(length)
+        generator = SequenceGenerator(
+            list(nums), filename=filename, continue_sequence=continue_sequence
+        )
+    generator.generate_sequence(length)
     if indices:
-        print([(i + 1, num) for i, num in enumerate(sequence)])
+        logger.info([(i + 1, num) for i, num in enumerate(generator.get_sequence())])
     else:
-        print(sequence)
+        logger.info(generator.get_sequence())
