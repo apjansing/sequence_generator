@@ -1,0 +1,33 @@
+# This workflow will install Python dependencies, run pytest tests and black linting with a single version of Python
+
+name: Python package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+    build:
+    
+        runs-on: ubuntu-latest
+    
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+            - name: "Set up Python 3.10"
+              uses: actions/setup-python@v3
+              with:
+                python-version: "3.10"
+            - name: "Install dependencies"
+              run: |
+                pip install -U pip
+                pip install poetry
+                poetry install
+            - name: "Lint with black"
+              run: |
+                poetry run black . --check  --diff
+            - name: "Test with pytest"
+              run: |
+                poetry run pytest --cov=src
