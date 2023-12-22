@@ -14,7 +14,9 @@ def test_generate_sequence():
         16,
     ]
     assert os.path.exists("test.csv")
+    assert os.path.exists("test.pickle")
     os.remove("test.csv")
+    os.remove("test.pickle")
 
     assert SequenceGenerator([1, 2], filename=None).generate_sequence(3) == [1, 2, 3]
     assert SequenceGenerator([0, 0], filename=None).generate_sequence(5) == [
