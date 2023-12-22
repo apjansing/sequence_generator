@@ -1,5 +1,6 @@
 from sympy import isprime
 from typing import List
+import pickle
 
 
 class SequenceGenerator:
@@ -16,6 +17,16 @@ class SequenceGenerator:
     ):
         self.initial_values = initial_values
         self.generator = generator
+
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+        if "generator" not in state:
+            self.generator = lambda x, y: x + y
+        if "initial_values" not in state:
+            self.initial_values = [1, 1]
 
     def generate_sequence(self, n):
         """
