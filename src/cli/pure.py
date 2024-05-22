@@ -1,9 +1,9 @@
 from typing import List, Optional
 import click
+from loguru import logger
 from src.cli.utils import safe_eval
 from src.sequence_generator import SequenceGenerator
 from .options import length, lambda_str, indices, nums, filename, continue_sequence
-from loguru import logger
 
 
 @click.command(context_settings={"show_default": True})
