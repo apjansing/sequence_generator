@@ -1,3 +1,5 @@
+# These imports are required for the safe_eval function
+# pylint: disable-next=unused-import
 from math import (
     ceil,
     floor,
@@ -18,6 +20,9 @@ import ast
 
 
 def safe_eval(lambda_str):
+    """
+    Safely evaluate a lambda string by checking if the names used in the lambda string are allowed
+    """
     allowed_names = {
         *[chr for chr in "abcdefghijklmnopqrstuvwxyz"],  # allowed variable names
         "abs",
@@ -51,5 +56,6 @@ def safe_eval(lambda_str):
             raise ValueError(f"Invalid name used in lambda expression: {node.id}")
 
     # If all names are allowed, then evaluate the expression
+    # pylint: disable-next=eval-used
     lambda_func = eval(compile(parsed, filename="<string>", mode="eval"))
     return lambda_func
