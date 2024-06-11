@@ -28,16 +28,14 @@ def pure(
     generator = None
     if lambda_str:
         lambda_eval = safe_eval(lambda_str)
-        generator = SequenceGenerator(
-            list(nums),
-            lambda_eval,
-            filename=filename,
-            continue_sequence=continue_sequence,
-        )
+        config = {
+            "option": {
+                "continue_sequence": continue_sequence,
+            }
+        }
+        generator = SequenceGenerator(list(nums), lambda_eval, filename=filename, **config)
     else:
-        generator = SequenceGenerator(
-            list(nums), filename=filename, continue_sequence=continue_sequence
-        )
+        generator = SequenceGenerator(list(nums), filename=filename, continue_sequence=continue_sequence)
     generator.generate_sequence(length)
     if indices:
         logger.info([(i + 1, num) for i, num in enumerate(generator.get_sequence())])

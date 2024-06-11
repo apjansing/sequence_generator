@@ -18,15 +18,14 @@ class SequenceGenerator:
         generator: Callable = (lambda x, y: x + y),
         filename="sequence",
         **kwargs,
-        # continue_sequence: bool = False,
     ):
         options: Dict = kwargs.get("options", {})
-        self.continue_sequence = options.get("continue_sequence", False)
-        if self.continue_sequence:
-            pickle_file = f"{filename}.pickle"
-            if path.exists(pickle_file):
-                with open(f"{filename}.pickle", "rb") as f:
-                    self.__setstate__(dill.load(f))
+        self.continue_sequence = kwargs.get("continue_sequence", False)
+
+        pickle_file = f"{filename}.pickle"
+        if self.continue_sequence and path.exists(pickle_file):
+            with open(pickle_file, "rb") as f:
+                self.__setstate__(dill.load(f))
         else:
             self.initial_values = initial_values
             self.generator = generator if generator else (lambda x, y: x + y)
@@ -58,13 +57,13 @@ class SequenceGenerator:
 
                 # TODO: Address this when the Generator is a class and not a lambda
                 # pylint: disable-next=eval-used
-                data_type = eval(type_name)
+                self.value_type = eval(type_name)
 
                 if tail > 0:
                     seq = f.readlines()[-tail:]
                 else:
                     seq = f.readlines()
-                return [data_type(s) for s in seq]
+                return [self.value_type(s) for s in seq]
         else:
             return self.sequence
 
