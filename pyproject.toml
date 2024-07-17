@@ -6,7 +6,7 @@ authors = ["Alex Jansing <apjansing@gmail.com>"]
 readme = "README.md"
 repository = "https://github.com/apjansing/sequence_generator"
 keywords = ["sequence", "generator", "fibonacci", "lucas"]
-packages = [{include = "*", from  = "src"}]
+packages = [{include = "*", from  = "sequence_generator"}]
 
 [tool.pylint]
 disable = "C0114,E0611,W0621"
