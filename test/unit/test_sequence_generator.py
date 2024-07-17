@@ -1,6 +1,6 @@
 import os
-from sequence_generator import SequenceGenerator
 import pytest
+from sequence_generator.sequence_generator import SequenceGenerator
 
 
 def test_generate_sequence(tmpdir):
