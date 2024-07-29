@@ -17,7 +17,7 @@ class SequenceGenerator:
         generator: Callable = (lambda x, y: x + y),
         filename="sequence",
         continue_sequence: bool = False,
-        steaming_mode: bool = False,
+        memory_safe_mode: bool = False,
     ):
         if continue_sequence and os.path.exists(f"{filename}.pickle"):
 
@@ -30,7 +30,7 @@ class SequenceGenerator:
             self.generator = generator if generator else (lambda x, y: x + y)
             self.filename = filename if filename else "sequence"
             self.sequence = initial_values.copy()
-            self.streaming_mode = steaming_mode
+            self.memory_safe_mode = memory_safe_mode
             self.initial_run = True
 
         self.csv_path = os.path.join('.', f"{self.filename}.csv")
@@ -138,7 +138,7 @@ class SequenceGenerator:
         :return: A list of numbers
         """
         sequence = []
-        if self.streaming_mode:
+        if self.memory_safe_mode:
             for _ in range(length):
                 next_value = self.generate_sequence_()[0]
                 self.__write_sequence(next_value)

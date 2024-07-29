@@ -5,7 +5,7 @@ sequence_generator = SequenceGenerator(
     generator=(lambda x, y: x + y),
     filename="fibonacci",
     continue_sequence=True,
-    steaming_mode=False,
+    memory_safe_mode=False,
 )
 # sequence_generator.generate_sequence(10)
 sequence_generator.generate_sequence(10000)
