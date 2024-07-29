@@ -1,8 +1,7 @@
-from typing import List, Callable, Dict
-from os import path
+from typing import List, Callable, Union
+import os
 import dill
 from loguru import logger
-from .annotations import write_sequence
 
 
 class SequenceGenerator:
@@ -17,21 +16,28 @@ class SequenceGenerator:
         initial_values: List = [1, 1],
         generator: Callable = (lambda x, y: x + y),
         filename="sequence",
-        **kwargs,
+        continue_sequence: bool = False,
+        steaming_mode: bool = False,
     ):
-        options: Dict = kwargs.get("options", {})
-        self.continue_sequence = kwargs.get("continue_sequence", False)
+        if continue_sequence and os.path.exists(f"{filename}.pickle"):
 
-        pickle_file = f"{filename}.pickle"
-        if self.continue_sequence and path.exists(pickle_file):
-            with open(pickle_file, "rb") as f:
+            with open(f"{filename}.pickle", "rb") as f:
                 self.__setstate__(dill.load(f))
+            self.continue_sequence = continue_sequence
         else:
+            self.continue_sequence = continue_sequence
             self.initial_values = initial_values
             self.generator = generator if generator else (lambda x, y: x + y)
-            self.filename = filename
+            self.filename = filename if filename else "sequence"
             self.sequence = initial_values.copy()
-            self.value_type = type(self.initial_values[0])
+            self.streaming_mode = steaming_mode
+            self.initial_run = True
+
+        self.csv_path = os.path.join('.', f"{self.filename}.csv")
+        self.pickle_path = os.path.join('.', f"{self.filename}.pickle")
+
+        if self.initial_run:
+            self.__write_sequence(self.sequence)
         logger.info(self.__reduce__())
 
     def __reduce__(self):
@@ -44,28 +50,44 @@ class SequenceGenerator:
         # Deserialize the object's state using dill
         self.__dict__ = dill.loads(state)
 
-    def get_sequence(self, tail: int = -1) -> List:
+    def __write_sequence(self, sequence_portion: Union[List, int]) -> None:
+        """
+        Writes or appends a sequence to a file if a filename is provided
+        :param sequence: The sequence to write
+        """
+        csv_exists = os.path.exists(self.csv_path)
+        pickle_exists = os.path.exists(self.pickle_path)
+        if self.initial_run and (csv_exists or pickle_exists):
+            raise FileExistsError(
+                f'''Cannot overwrite existing files on initial run. Please check for {self.filename}.csv and {self.filename}.pickle
+                and either delete them or set continue_sequence to True
+                '''
+            )
+
+        sequence_portion = sequence_portion if isinstance(sequence_portion, list) else [sequence_portion]
+
+        if csv_exists and not self.continue_sequence:
+            logger.warning(f"File {self.csv_path} already exists. Overwriting file")
+        with open(
+            self.csv_path,
+            "a" if self.continue_sequence else "w",
+            encoding="UTF-8",
+        ) as f:
+            for s in sequence_portion:
+                f.write(str(s) + "\n")
+
+        if pickle_exists and not self.continue_sequence:
+            logger.warning(f"File {self.filename}.pickle already exists. Overwriting file")
+        with open(f"{self.filename}.pickle", "wb") as f:
+            self.initial_run = False
+            f.write(dill.dumps(self))
+
+    def get_sequence(self) -> List:
         """
         Reads a sequence from a file if a filename is provided
         :return: The sequence
         """
-        if self.filename and path.exists(f"{self.filename}.csv"):
-            with open(f"{self.filename}.csv", "r", encoding="UTF-8") as f:
-                # Extract the type name
-                type_line = f.readline().strip()
-                type_name = type_line.split("'")[1]
-
-                # TODO: Address this when the Generator is a class and not a lambda
-                # pylint: disable-next=eval-used
-                self.value_type = eval(type_name)
-
-                if tail > 0:
-                    seq = f.readlines()[-tail:]
-                else:
-                    seq = f.readlines()
-                return [self.value_type(s) for s in seq]
-        else:
-            return self.sequence
+        return self.sequence
 
     def print_sequence(self) -> None:
         """
@@ -79,7 +101,7 @@ class SequenceGenerator:
             logger.warning("No sequence has been generated yet")
             logger.info(sequence)
 
-    def generate_sequence_(self, length: int) -> List:
+    def generate_sequence_(self, length: int = 1) -> List:
         """
         An alternate method that generates a fibonacci-like sequence of numbers,
         but does not use the write_sequence decorator
@@ -90,16 +112,15 @@ class SequenceGenerator:
 
         if self.continue_sequence:
             sequence = []
-            generating_numbers = self.get_sequence(tail=to_pick)
             for _ in range(length):
-                logger.info(f"Generating numbers: {generating_numbers}")
+                logger.trace(f"Generating numbers: {self.sequence}")
                 # Generate the next number in the sequence by applying the generator
                 # to the last `length` of numbers where length is the length of initial values
-                sequence.append(self.generator(*generating_numbers))
-                generating_numbers = (
+                sequence.append(self.generator(*self.sequence))
+                self.sequence = (
                     sequence[-to_pick:]
                     if len(sequence) >= to_pick
-                    else generating_numbers[len(sequence) - to_pick :] + sequence
+                    else self.sequence[len(sequence) - to_pick :] + sequence
                 )
         else:
             sequence = self.initial_values.copy()
@@ -110,11 +131,17 @@ class SequenceGenerator:
 
         return sequence
 
-    @write_sequence
     def generate_sequence(self, length: int) -> List:
         """
         Generates a fibonacci-like sequence of numbers
         :param n: The number of numbers to generate
         :return: A list of numbers
         """
-        return self.generate_sequence_(length)
+        sequence = []
+        if self.streaming_mode:
+            for _ in range(length):
+                next_value = self.generate_sequence_()[0]
+                self.__write_sequence(next_value)
+        else:
+            sequence = self.generate_sequence_(length)
+            self.__write_sequence(sequence)
