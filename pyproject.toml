@@ -16,8 +16,8 @@ generate_sequence = "src.cli.cli:generate_sequence"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-black = "^23.9.1"
-setuptools = "^68.2.2"
+black = "24.3.0"
+setuptools = "70.0.0"
 sympy = "^1.12"
 loguru = "^0.7.2"
 dill = "^0.3.7"
